@@ -1,0 +1,160 @@
+以下対応のプログラム・スクリプトをリリースします。
+・調査対象判定・スリム化判定仕様変更対応
+
+【リリース手順】
+1) 設定ファイル配置
+2) Webモジュール更新・バッチモジュール更新
+3) バッチのリンク再作成
+4) バッチ起動用シェル配置
+5) 動作確認
+
+
+【1）設定ファイル配置】
+------------------------------
+-- 医療機関サーバーサーバーで実施します
+------------------------------
+/usr/local/batch_app/config ディレクトリを作成し、propertiesファイルを配置してください。
+Webモジュールとバッチモジュールがreadできるpermissionを付与してください。
+
+  investigation_00.properties
+  investigation_01.properties
+  investigation_10.properties
+  investigation_11.properties
+  investigation_12.properties
+  investigation_13.properties
+  investigation_14.properties
+  slimization.properties
+
+------------------------------
+-- edwardsサーバーで実施します
+------------------------------
+/usr/local/batch_app/config ディレクトリを作成し、propertiesファイルを配置してください。
+Webモジュールとバッチモジュールがreadできるpermissionを付与してください。
+
+  investigation_00.properties
+  investigation_01.properties
+  investigation_10.properties
+  investigation_11.properties
+  investigation_12.properties
+  investigation_13.properties
+  investigation_14.properties
+  slimization.properties
+------------------------------
+-- medtronicサーバーで実施します
+------------------------------
+/usr/local/batch_app/config ディレクトリを作成し、propertiesファイルを配置してください。
+Webモジュールとバッチモジュールがreadできるpermissionを付与してください。
+
+  investigation_00.properties
+  investigation_01.properties
+  investigation_10.properties
+  investigation_11.properties
+  investigation_12.properties
+  investigation_13.properties
+  investigation_14.properties
+  slimization.properties
+
+【2）Webモジュール更新・バッチモジュール更新】
+それぞれのサーバーに各モジュールをデプロイしてください。
+
+●Webモジュール
+　→　各サーバー内の/usr/local/apache-tomcat-8.0.21/webapps/
+
+●バッチモジュール
+　→　各サーバー内の/usr/local/batch_app/
+
+
+
+【3）バッチのリンク再作成】
+各バッチへのリンクを再作成してください。
+------------------------------
+-- 医療機関サーバーで実施します
+------------------------------
+ 【3)-1.ファイルをコピー】
+  所定のフォルダへファイルをコピーしてください。
+  tavi-user-batch-2.0.9.jar
+
+ 【3)-2.リンクの削除】
+  バッチへのリンクを一旦削除してください。
+  sudo rm tavi-user-batch.jar
+
+ 【3)-2.リンクの再作成】
+  バッチへのリンクを再作成してください。
+  sudo ln -s tavi-user-batch-2.0.9.jar tavi-user-batch.jar
+
+
+------------------------------
+-- edwardsサーバーで実施します
+------------------------------
+ 【3)-4.ファイルをコピー】
+  所定のフォルダへファイルをコピーしてください。
+  tavi-edwards-batch-2.0.9.jar
+
+ 【3)-5.リンクの削除】
+  バッチへのリンクを一旦削除してください。
+  sudo rm tavi-edwards-batch.jar
+
+ 【3)-6.リンクの再作成】
+  バッチへのリンクを再作成してください。
+  sudo ln -s tavi-edwards-batch-2.0.9.jar tavi-edwards-batch.jar
+
+
+------------------------------
+-- medtronicサーバーで実施します
+------------------------------
+ 【3)-7.ファイルをコピー】
+  所定のフォルダへファイルをコピーしてください。
+  tavi-medtronic-batch-2.0.9.jar
+
+ 【3)-8.リンクの削除】
+  バッチへのリンクを一旦削除してください。
+  sudo rm tavi-medtronic-batch.jar
+
+ 【3)-9.リンクの再作成】
+  バッチへのリンクを再作成してください。
+  sudo ln -s tavi-medtronic-batch-2.0.9.jar tavi-medtronic-batch.jar
+
+
+
+【4) バッチ起動用シェル配置】
+------------------------------
+-- 医療機関サーバーで実施します
+------------------------------
+/usr/local/batch_app/shell へ以下を配置してください。
+
+FollowupMailApp_edwards.sh
+FollowupMailApp_medtronic.sh
+
+------------------------------
+-- edwardsサーバーで実施します
+------------------------------
+/usr/local/batch_app/shell へ以下を配置してください。
+
+FilterInvestigationKarte_investigation1.sh
+FilterInvestigationKarte_investigation2.sh
+
+------------------------------
+-- medtronicサーバーで実施します
+------------------------------
+/usr/local/batch_app/shell へ以下を配置してください。
+
+FilterInvestigationKarte_investigation3.sh
+FilterInvestigationKarte_investigation4.sh
+FilterInvestigationKarte_investigation5.sh
+FilterInvestigationKarte_investigation6.sh
+FilterInvestigationKarte_investigation7.sh
+
+
+
+【5) 動作確認】
+------------------------------
+-- 動作確認を実施します
+------------------------------
+
+※. 症例振り分けバッチのシェルスクリプト中のオプションを変更することで、DB更新を行わず振り分けのみの動作確認を行うことができます。
+
+
+FilterInvestigationKarte_investigation1.sh をエディタで開き、冒頭に宣言されている変数 PG_MODE の値を 1 に設定してください。
+他のシェルスクリプトも同様の修正を行ってください。
+
+    PG_MODE=1

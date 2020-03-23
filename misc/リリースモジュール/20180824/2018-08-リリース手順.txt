@@ -1,0 +1,272 @@
+********************************************************************
+既にご提供済みの2017-07-31 リリースモジュール[Evolut-R調査分割対応]の
+スクリプトが実行されていることが前提です。
+********************************************************************
+
+以下対応のプログラム・スクリプトをリリースします。
+・調査7追加対応 等
+
+【リリース手順】
+1) データベース更新
+2) Webモジュール更新・バッチモジュール更新
+3) バッチのリンク再作成
+4) バッチ起動用シェル配置
+5) 動作確認
+
+
+【1）データベース更新】
+
+■tavi_userDBサーバー
+------------------------------
+-- tavi_userで実施します
+------------------------------
+$ su - tavi_db_user
+※パスワードを入力
+$ cd /tmp/01.script
+※適宜アップロードしたDDLファイルの場所に移動
+
+$ psql tavi_user
+※パスワードを入力
+tavi_user=# \i 01.alter_tavi_user.sql
+tavi_user=# \i 02.insert_tavi_user.sql
+tavi_user=# \i 02_02.insert_update_tavi_user.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+tavi_user=# SELECT * FROM tavi症例データ管理 LIMIT 1;
+tavi_user=# SELECT * FROM 患者背景 LIMIT 1;
+tavi_user=# SELECT * FROM 術中情報 LIMIT 1;
+tavi_user=# SELECT * FROM 施設調査契約マスタ LIMIT 1;
+
+--※【確認】各テーブルにレコードが追加されていることを確認
+tavi_user=# SELECT * FROM 症例入力選択値マスタ WHERE 選択項目識別子 LIKE ('%Clinical Frailty Scale%');
+tavi_user=# SELECT * FROM システム設定マスタ WHERE 設定識別子 LIKE ('%close.date%');
+tavi_user=# SELECT * FROM 症例テーブルマスタ WHERE 物理テーブル名 LIKE ('%調査7%');
+tavi_user=# SELECT * FROM 症例入力選択値マスタ WHERE 調査区分 LIKE ('14');
+tavi_user=# SELECT * FROM 症例入力選択値マスタ WHERE 調査区分 IN ('11', '12', '13', '14') AND 選択項目識別子 = '製品・後拡張用バルーンカテーテルコード';
+
+tavi_user=# \q
+$ psql tavi_not_in_investigation
+------------------------------
+-- tavi_not_in_investigationで実施します
+------------------------------
+tavi_not_in_investigation=# \i 10.alter_tavi_not_in_investigation.sql
+tavi_not_in_investigation=# \i 23.update_tavi_not_in_investigation.sql
+
+■edwardsDBサーバー
+$ su - tavi_db_maker1
+※パスワードを入力
+$ cd /tmp/01.script
+※適宜アップロードしたDDLファイルの場所に移動
+
+$ psql tavi_investigation1
+------------------------------
+-- tavi_investigation1で実施します
+------------------------------
+tavi_investigation1=# \i 03.alter_tavi_investigation1.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+tavi_investigation1=# SELECT * FROM tavi症例データ管理 LIMIT 1;
+tavi_investigation1=# SELECT * FROM 術前情報 LIMIT 1;
+tavi_investigation1=# SELECT * FROM 患者背景 LIMIT 1;
+tavi_investigation1=# SELECT * FROM 術中情報 LIMIT 1;
+tavi_investigation1=# SELECT * FROM 施設調査契約マスタ LIMIT 1;
+
+
+tavi_investigation1=# \q
+$ psql tavi_investigation2
+------------------------------
+-- tavi_investigation2で実施します
+------------------------------
+tavi_investigation2=# \i 04.alter_tavi_investigation2.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+--※tavi_investigation1と同じ
+
+
+$ psql tavi_maker1
+------------------------------
+tavi_maker1で実施します
+------------------------------
+tavi_maker1=# \i 11.alter_tavi_maker1.sql
+tavi_maker1=# \i 14.update_tavi_maker1.sql
+tavi_maker1=# \i 25.update_tavi_maker1.sql
+
+
+■medtronicDBサーバー
+$ su - tavi_db_maker2
+※パスワードを入力
+$ cd /tmp/01.script
+※適宜アップロードしたDDLファイルの場所に移動
+
+※データベースが他プロセスから利用中の場合にはpostgresqlの再起動が必要となります。
+
+$ psql tavi_investigation3
+------------------------------
+-- tavi_investigation3で実施します
+------------------------------
+tavi_investigation3=# \i 05.alter_tavi_investigation3.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+
+
+tavi_investigation3=# \q
+$ psql tavi_investigation4
+------------------------------
+-- tavi_investigation4で実施します
+------------------------------
+tavi_investigation4=# \i 06.alter_tavi_investigation4.sql
+tavi_investigation4=# \i 20.update_tavi_investigation4.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+
+
+tavi_investigation4=# \q
+$ psql tavi_investigation5
+------------------------------
+-- tavi_investigation5で実施します
+------------------------------
+tavi_investigation5=# \i 07.alter_tavi_investigation5.sql
+tavi_investigation5=# \i 21.update_tavi_investigation5.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+
+
+tavi_investigation5=# \q
+$ psql tavi_investigation6
+------------------------------
+-- tavi_investigation6で実施します
+------------------------------
+tavi_investigation6=# \i 08.alter_tavi_investigation6.sql
+tavi_investigation6=# \i 22.update_tavi_investigation6.sql
+
+--※【確認】各テーブルにカラムが追加されていることを確認
+
+
+tavi_investigation6=# \q
+$ psql tavi_maker2
+------------------------------
+-- tavi_maker2で実施します
+------------------------------
+tavi_maker2=# \i 00.create_tavi_investigation7.sql
+
+
+tavi_maker2=# \q
+$ psql tavi_investigation7
+------------------------------
+-- tavi_investigation7で実施します
+【注意!】対象DBのレコードが消去されるので、間違えないよう注意が必要です。
+------------------------------
+tavi_investigation7=# \i 00.create_tavi_investigation7_initialize.sql
+tavi_investigation7=# \i 09.alter_tavi_investigation7.sql
+------------------------------
+--※【確認】テーブルが作成されていること、カラムが追加されていることを確認
+
+
+tavi_investigation7=# \q
+$ psql tavi_maker2
+------------------------------
+-- tavi_maker2で実施します
+------------------------------
+tavi_maker2=# \i 12.alter_tavi_maker2.sql
+tavi_maker2=# \i 15.update_tavi_maker2.sql
+tavi_maker2=# \i 26.update_tavi_maker2.sql
+
+
+■tavi_userDBサーバー
+$ su - tavi_db_user
+※パスワードを入力
+$ cd /tmp/01.script
+※適宜アップロードしたDDLファイルの場所に移動
+
+$ psql tavi_user
+------------------------------
+-- tavi_userで実施します
+------------------------------
+tavi_user=# \i 13.update_tavi_user.sql
+tavi_user=# \i 16.alter_tavi_user.sql
+tavi_user=# \i 17.update_tavi_user.sql
+tavi_user=# \i 18.update_tavi_user.sql
+tavi_user=# \i 19.update_tavi_user.sql
+tavi_user=# \i 24.update_tavi_user.sql
+
+
+
+【2）Webモジュール更新・バッチモジュール更新】
+それぞれのサーバーに各モジュールをデプロイしてください。
+-- 対象モジュール
+--
+
+●Webモジュール
+　→　各サーバー内の/usr/local/apache-tomcat-8.0.21/webapps/
+
+●バッチモジュール
+　→　各サーバー内の/usr/local/batch_app/
+
+
+
+【3）バッチのリンク再作成】
+各バッチへのリンクを再作成してください。
+------------------------------
+-- 医療機関サーバーで実施します
+------------------------------
+ 【3)-1.ファイルをコピー】
+  所定のフォルダへファイルをコピーしてください。
+  tavi-user-batch-2.0.8.jar
+
+ 【3)-2.リンクの削除】
+  バッチへのリンクを一旦削除してください。
+  sudo rm tavi-user-batch.jar
+
+ 【3)-2.リンクの再作成】
+  バッチへのリンクを再作成してください。
+  sudo ln -s tavi-user-batch-2.0.8.jar tavi-user-batch.jar
+
+
+------------------------------
+-- edwardsサーバーで実施します
+------------------------------
+ 【3)-4.ファイルをコピー】
+  所定のフォルダへファイルをコピーしてください。
+  tavi-edwards-batch-2.0.8.jar
+
+ 【3)-5.リンクの削除】
+  バッチへのリンクを一旦削除してください。
+  sudo rm tavi-edwards-batch.jar
+
+ 【3)-6.リンクの再作成】
+  バッチへのリンクを再作成してください。
+  sudo ln -s tavi-edwards-batch-2.0.8.jar tavi-edwards-batch.jar
+
+
+------------------------------
+-- medtronicサーバーで実施します
+------------------------------
+ 【3)-7.ファイルをコピー】
+  所定のフォルダへファイルをコピーしてください。
+  tavi-medtronic-batch-2.0.8.jar
+
+ 【3)-8.リンクの削除】
+  バッチへのリンクを一旦削除してください。
+  sudo rm tavi-medtronic-batch.jar
+
+ 【3)-9.リンクの再作成】
+  バッチへのリンクを再作成してください。
+  sudo ln -s tavi-medtronic-batch-2.0.8.jar tavi-medtronic-batch.jar
+
+
+
+【4) バッチ起動用シェル配置】
+------------------------------
+-- medtronicサーバーで実施します
+------------------------------
+/usr/local/batch_app/shell へ
+FilterInvestigationKarte_investigation7.shを配置する。
+
+後、適宜cron等へ追加してください。
+
+
+
+【5) 動作確認】
+------------------------------
+-- 動作確認を実施します
+------------------------------
